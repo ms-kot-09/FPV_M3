@@ -27,7 +27,7 @@ func _input(event: InputEvent) -> void:
 			_value = Vector2.ZERO
 			emit_signal("moved", _value)
 	elif event is InputEventScreenDrag and _dragging:
-		var local_p := (event.position - global_position) - _center
+		var local_p: Vector2 = (event.position - global_position) - _center
 		local_p = local_p.clamped(radius)
 		_value = local_p / radius
 		if _value.length() < deadzone:

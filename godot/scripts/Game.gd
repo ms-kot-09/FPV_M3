@@ -97,8 +97,8 @@ func _fire_hitscan(cam: Camera3D, pellets: int, spread_deg: float, dmg: float) -
 		var to := from + dir * 200.0
 		var res := space.intersect_ray(PhysicsRayQueryParameters3D.create(from, to))
 		if res.has("collider"):
-			var col := res["collider"]
-			var dn := col.get_node_or_null("Damageable")
+			var col = res["collider"]
+			var dn = col.get_node_or_null("Damageable")
 			if dn and dn is Damageable:
 				(dn as Damageable).apply_damage(dmg)
 				if (dn as Damageable).hp <= 0.0:

@@ -90,7 +90,7 @@ func explode() -> void:
 		var col = h.get("collider")
 		if col == null:
 			continue
-		var dmg := col.get_node_or_null("Damageable")
-		if dmg and dmg is Damageable:
-			(dmg as Damageable).apply_damage(blast_damage)
+		var dn = col.get_node_or_null("Damageable")
+		if dn and dn is Damageable:
+			(dn as Damageable).apply_damage(blast_damage)
 	queue_free()
