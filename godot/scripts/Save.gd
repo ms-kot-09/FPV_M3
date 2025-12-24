@@ -1,6 +1,4 @@
 extends Node
-class_name Save
-
 const PATH := "user://save.json"
 
 var coins: int = 0

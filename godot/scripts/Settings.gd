@@ -1,6 +1,4 @@
 extends Node
-class_name Settings
-
 const PATH := "user://settings.json"
 
 var language: String = "ru"
@@ -47,11 +45,11 @@ func to_dict() -> Dictionary:
 
 func from_dict(d: Dictionary) -> void:
 	language = str(d.get("language", language))
-	var a := d.get("audio", {})
+    var a: Dictionary = d.get("audio", {}) as Dictionary
 	master_volume = float(a.get("master", master_volume))
 	music_volume = float(a.get("music", music_volume))
 	sfx_volume = float(a.get("sfx", sfx_volume))
-	var g := d.get("graphics", {})
+    var g: Dictionary = d.get("graphics", {}) as Dictionary
 	render_scale = clamp(float(g.get("render_scale", render_scale)), 0.7, 1.0)
 	shadows_enabled = bool(g.get("shadows", shadows_enabled))
 	fps_cap = int(g.get("fps_cap", fps_cap))
@@ -76,6 +74,6 @@ func load_settings() -> void:
 	if j.parse(txt) != OK:
 		Log.w("Settings: invalid JSON, ignoring")
 		return
-	var d := j.data
+    var d: Variant = j.data
 	if typeof(d) == TYPE_DICTIONARY:
 		from_dict(d)

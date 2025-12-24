@@ -43,4 +43,3 @@ This is an M3 playable milestone. Next upgrades:
 - Real weapon variety per drone (spread, recoil, projectiles)
 - Hangar/shop/inventory
 
-# FPV_M3

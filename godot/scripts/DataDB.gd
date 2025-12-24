@@ -1,6 +1,4 @@
 extends Node
-class_name DataDB
-
 var drones: Array = []
 var weapons: Array = []
 

@@ -1,6 +1,4 @@
 extends Node
-class_name Log
-
 enum Level { ERROR=0, WARN=1, INFO=2, DEBUG=3 }
 
 var level: int = Level.INFO

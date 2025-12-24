@@ -1,13 +1,11 @@
 extends Node
-class_name I18n
-
 var dict: Dictionary = {}
 
 func _ready() -> void:
 	dict = _load_dict("res://data/i18n.json")
 
 func tr_key(key: String) -> String:
-	var lang := Settings.language
+    var lang: String = Settings.language
 	if dict.has(key) and typeof(dict[key]) == TYPE_DICTIONARY:
 		var row: Dictionary = dict[key]
 		return str(row.get(lang, row.get("en", key)))
