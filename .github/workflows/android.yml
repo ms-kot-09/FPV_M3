@@ -12,6 +12,8 @@ jobs:
       GODOT_VERSION: "4.5.1"
       PROJECT_PATH: "godot"
       BUILD_DIR: "godot/build"
+      ANDROID_SDK_ROOT: "${{ github.workspace }}/android-sdk"
+      ANDROID_HOME: "${{ github.workspace }}/android-sdk"
 
     steps:
       - name: Checkout
@@ -23,45 +25,27 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      # Avoid android-actions/setup-android flakiness (sdkmanager XML/version + broken pipe).
-      # Use the SDK already available on ubuntu-latest runners.
-      - name: Install Android packages (API 34)
+      - name: Install Android SDK (cmdline-tools + packages)
         shell: bash
         run: |
           set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT}"
+          mkdir -p "${SDK}/cmdline-tools"
+          cd "${SDK}"
+          # Latest "command line tools only" package (Android Developers)
+          curl -L -o cmdline.zip "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip"
+          unzip -q cmdline.zip -d "${SDK}/cmdline-tools"
+          # Normalize directory layout to cmdline-tools/latest/...
+          rm -rf "${SDK}/cmdline-tools/latest"
+          mkdir -p "${SDK}/cmdline-tools/latest"
+          # zip contains cmdline-tools/...
+          mv "${SDK}/cmdline-tools/cmdline-tools/"* "${SDK}/cmdline-tools/latest/"
+          rm -rf "${SDK}/cmdline-tools/cmdline-tools"
 
-          # On GitHub-hosted runners ANDROID_HOME/ANDROID_SDK_ROOT are usually pre-set.
-          if [ -z "${ANDROID_HOME:-}" ]; then
-            export ANDROID_HOME="/usr/local/lib/android/sdk"
-          fi
-          if [ -z "${ANDROID_SDK_ROOT:-}" ]; then
-            export ANDROID_SDK_ROOT="$ANDROID_HOME"
-          fi
+          export PATH="${SDK}/cmdline-tools/latest/bin:${SDK}/platform-tools:${PATH}"
 
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-
-          # Locate sdkmanager
-          if [ -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
-            SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
-          else
-            SDKMANAGER="$(command -v sdkmanager || true)"
-          fi
-
-          if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found. Current ANDROID_HOME contents:"
-            ls -la "$ANDROID_HOME" || true
-            exit 1
-          fi
-
-          "$SDKMANAGER" --version || true
-
-          # Accept licenses. sdkmanager sometimes closes stdin early -> 'yes' gets broken pipe.
-          # Never fail the build on license accept step.
-          ( yes | "$SDKMANAGER" --licenses > /dev/null ) || true
-
-          # Install minimal packages for Godot Android export.
-          "$SDKMANAGER" --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          yes | sdkmanager --sdk_root="${SDK}" --licenses >/dev/null || true
+          sdkmanager --sdk_root="${SDK}" --install             "platform-tools"             "platforms;android-34"             "build-tools;34.0.0"
 
       - name: Download Godot Headless
         shell: bash
@@ -71,18 +55,27 @@ jobs:
           cd "$HOME/godot"
           curl -L -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q godot.zip
-          chmod +x "Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-          echo "$HOME/godot" >> "$GITHUB_PATH"
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          echo "$HOME/godot" >> $GITHUB_PATH
 
       - name: Install Export Templates
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.local/share/godot/export_templates"
-          cd "$HOME/.local/share/godot/export_templates"
+          TDIR="$HOME/.local/share/godot/export_templates"
+          mkdir -p "$TDIR"
+          cd "$TDIR"
           curl -L -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          rm -rf "${GODOT_VERSION}.stable"
           mkdir -p "${GODOT_VERSION}.stable"
           unzip -q templates.tpz -d "${GODOT_VERSION}.stable"
+          # Godot expects files directly in ${GODOT_VERSION}.stable/
+          if [ -d "${GODOT_VERSION}.stable/templates" ]; then
+            shopt -s dotglob
+            mv "${GODOT_VERSION}.stable/templates/"* "${GODOT_VERSION}.stable/"
+            rmdir "${GODOT_VERSION}.stable/templates" || true
+          fi
+          ls -la "${GODOT_VERSION}.stable" | sed -n '1,200p'
 
       - name: Prepare keystores (debug always, release optional)
         working-directory: ${{ env.PROJECT_PATH }}
@@ -92,8 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p keystore
-
-          # Debug keystore (always exists so export_presets doesn't break).
+          # Debug keystore (always generated)
           keytool -genkeypair -v             -keystore keystore/debug.keystore             -storepass android             -alias androiddebugkey             -keypass android             -keyalg RSA -keysize 2048 -validity 10000             -dname "CN=Android Debug,O=Android,C=US" || true
 
           # Release keystore (optional, provided via secrets).
@@ -114,7 +106,7 @@ jobs:
           set -euo pipefail
           Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --export-debug "Android (Debug)" "build/NeonFPV-debug.apk"
 
-      - name: Export Android Release AAB (if release keystore provided)
+      - name: Export Android Release AAB (if keystore provided)
         shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
