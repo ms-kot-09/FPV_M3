@@ -12,7 +12,7 @@ var fps_cap: int = 60
 var fov: float = 90.0
 
 # Touch layout (normalized 0..1 anchors for positions)
-var touch_layout := {
+var touch_layout: Dictionary = {
 	"left_stick": {"x": 0.16, "y": 0.78, "size": 1.0},
 	"right_stick": {"x": 0.84, "y": 0.78, "size": 1.0}
 }
@@ -59,7 +59,7 @@ func from_dict(d: Dictionary) -> void:
 func save_settings() -> void:
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
 	if f == null:
-		Log.w("Settings: cannot write settings.json")
+		GLog.w("GSettings: cannot write settings.json")
 		return
 	f.store_string(JSON.stringify(to_dict(), "\t"))
 
@@ -72,8 +72,9 @@ func load_settings() -> void:
 	var txt := f.get_as_text()
 	var j := JSON.new()
 	if j.parse(txt) != OK:
-		Log.w("Settings: invalid JSON, ignoring")
+		GLog.w("GSettings: invalid JSON, ignoring")
 		return
-    var d: Variant = j.data
-	if typeof(d) == TYPE_DICTIONARY:
-		from_dict(d)
+
+	if j.data is Dictionary:
+		from_dict(j.data)
+

@@ -19,7 +19,7 @@ func from_dict(d: Dictionary) -> void:
 func save() -> void:
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
 	if f == null:
-		Log.w("Save: can't write save.json")
+		GLog.w("GSave: can't write save.json")
 		return
 	f.store_string(JSON.stringify(to_dict(), "\t"))
 
@@ -32,7 +32,7 @@ func load_save() -> void:
 	var txt := f.get_as_text()
 	var j := JSON.new()
 	if j.parse(txt) != OK:
-		Log.w("Save: invalid JSON")
+		GLog.w("GSave: invalid JSON")
 		return
 	if typeof(j.data) == TYPE_DICTIONARY:
 		from_dict(j.data)

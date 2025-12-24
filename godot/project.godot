@@ -8,12 +8,12 @@ config/features=PackedStringArray("4.5")
 config/icon="res://icon.svg"
 
 [autoload]
-RunState="*res://scripts/RunState.gd"
-Log="*res://scripts/Log.gd"
-Settings="*res://scripts/Settings.gd"
-Save="*res://scripts/Save.gd"
-I18n="*res://scripts/I18n.gd"
-DataDB="*res://scripts/DataDB.gd"
+GRun="*res://scripts/RunState.gd"
+GLog="*res://scripts/Log.gd"
+GSettings="*res://scripts/Settings.gd"
+GSave="*res://scripts/Save.gd"
+GI18n="*res://scripts/I18n.gd"
+GDataDB="*res://scripts/DataDB.gd"
 
 [display]
 window/size/viewport_width=1920

@@ -23,14 +23,14 @@ func _ready() -> void:
 
 func _spawn_drone() -> void:
 	if drone_scene == null:
-		Log.e("Game: drone_scene not set")
+		GLog.e("Game: drone_scene not set")
 		return
 	player = drone_scene.instantiate()
 	add_child(player)
 	player.global_position = $DroneSpawn.global_position
 	# apply selected drone parameters from data
-	var id := RunState.selected_drone_id
-	var d := DataDB.get_drone_by_id(id)
+	var id := GRun.selected_drone_id
+	var d := GDataDB.get_drone_by_id(id)
 	var dtype := str(d.get("type", "armed"))
 	player.is_kamikaze = (dtype == "kamikaze")
 	player.blast_radius = float(d.get("blast_radius", player.blast_radius))
@@ -51,7 +51,7 @@ func _spawn_drone() -> void:
 
 	var cam := $DroneSpawn/CameraPivot/Camera3D
 	cam.current = true
-	cam.fov = Settings.fov
+	cam.fov = GSettings.fov
 	cam_pivot.reparent(player)
 	cam_pivot.position = Vector3.ZERO
 
@@ -103,7 +103,7 @@ func _fire_hitscan(cam: Camera3D, pellets: int, spread_deg: float, dmg: float) -
 				(dn as Damageable).apply_damage(dmg)
 				if (dn as Damageable).hp <= 0.0:
 					kills += 1
-					Save.add_coins(5)
+					GSave.add_coins(5)
 					_update_hud()
 
 func _fire_rocket(cam: Camera3D) -> void:
@@ -120,4 +120,4 @@ func _on_player_exploded() -> void:
 
 func _update_hud() -> void:
 	if hud.has_node("Root/Stats"):
-		hud.get_node("Root/Stats").text = "Kills: %d  Coins: %d" % [kills, Save.coins]
+		hud.get_node("Root/Stats").text = "Kills: %d  Coins: %d" % [kills, GSave.coins]
