@@ -12,8 +12,6 @@ jobs:
       GODOT_VERSION: "4.5.1"
       PROJECT_PATH: "godot"
       BUILD_DIR: "godot/build"
-      ANDROID_SDK_ROOT: "${{ github.workspace }}/android-sdk"
-      ANDROID_HOME: "${{ github.workspace }}/android-sdk"
 
     steps:
       - name: Checkout
@@ -25,85 +23,79 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Install Android SDK (cmdline-tools + packages)
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages (SDK 34)
         shell: bash
         run: |
-          set -euo pipefail
-          SDK="${ANDROID_SDK_ROOT}"
-          mkdir -p "${SDK}/cmdline-tools"
-          cd "${SDK}"
-          # Latest "command line tools only" package (Android Developers)
-          curl -L -o cmdline.zip "https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip"
-          unzip -q cmdline.zip -d "${SDK}/cmdline-tools"
-          # Normalize directory layout to cmdline-tools/latest/...
-          rm -rf "${SDK}/cmdline-tools/latest"
-          mkdir -p "${SDK}/cmdline-tools/latest"
-          # zip contains cmdline-tools/...
-          mv "${SDK}/cmdline-tools/cmdline-tools/"* "${SDK}/cmdline-tools/latest/"
-          rm -rf "${SDK}/cmdline-tools/cmdline-tools"
+          set -e
+          sdkmanager --version
+          # Accept licenses (avoid failing on SIGPIPE from `yes`)
+          yes | sdkmanager --licenses > /dev/null || true
 
-          export PATH="${SDK}/cmdline-tools/latest/bin:${SDK}/platform-tools:${PATH}"
-
-          yes | sdkmanager --sdk_root="${SDK}" --licenses >/dev/null || true
-          sdkmanager --sdk_root="${SDK}" --install             "platform-tools"             "platforms;android-34"             "build-tools;34.0.0"
+          sdkmanager --install             "platform-tools"             "platforms;android-34"             "build-tools;34.0.0"
 
       - name: Download Godot Headless
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
           mkdir -p "$HOME/godot"
           cd "$HOME/godot"
           curl -L -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q godot.zip
-          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
-          echo "$HOME/godot" >> $GITHUB_PATH
+          chmod +x "Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          echo "$HOME/godot" >> "$GITHUB_PATH"
 
       - name: Install Export Templates
         shell: bash
         run: |
-          set -euo pipefail
-          TDIR="$HOME/.local/share/godot/export_templates"
-          mkdir -p "$TDIR"
-          cd "$TDIR"
+          set -e
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          cd "$HOME/.local/share/godot/export_templates"
           curl -L -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+
           rm -rf "${GODOT_VERSION}.stable"
           mkdir -p "${GODOT_VERSION}.stable"
           unzip -q templates.tpz -d "${GODOT_VERSION}.stable"
-          # Godot expects files directly in ${GODOT_VERSION}.stable/
+
+          # Godot expects templates directly under <version>.stable/
           if [ -d "${GODOT_VERSION}.stable/templates" ]; then
-            shopt -s dotglob
-            mv "${GODOT_VERSION}.stable/templates/"* "${GODOT_VERSION}.stable/"
+            mv "${GODOT_VERSION}.stable/templates/"* "${GODOT_VERSION}.stable/" || true
             rmdir "${GODOT_VERSION}.stable/templates" || true
           fi
-          ls -la "${GODOT_VERSION}.stable" | sed -n '1,200p'
 
-      - name: Prepare keystores (debug always, release optional)
+          # Sanity check for Android templates
+          test -f "${GODOT_VERSION}.stable/android_debug.apk"
+          test -f "${GODOT_VERSION}.stable/android_release.apk"
+
+      - name: Prepare keystores
         working-directory: ${{ env.PROJECT_PATH }}
         shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          set -euo pipefail
+          set -e
           mkdir -p keystore
-          # Debug keystore (always generated)
-          keytool -genkeypair -v             -keystore keystore/debug.keystore             -storepass android             -alias androiddebugkey             -keypass android             -keyalg RSA -keysize 2048 -validity 10000             -dname "CN=Android Debug,O=Android,C=US" || true
+          # Debug keystore (generated)
+          keytool -genkeypair -v             -keystore keystore/debug.keystore -storepass android             -alias androiddebugkey -keypass android             -keyalg RSA -keysize 2048 -validity 10000             -dname "CN=Android Debug,O=Android,C=US" || true
 
-          # Release keystore (optional, provided via secrets).
-          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+          # Release keystore (optional)
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > keystore/release.keystore
           fi
 
       - name: Import project (generate .import)
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
           mkdir -p "${BUILD_DIR}"
           Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --import
 
       - name: Export Android Debug APK
         shell: bash
         run: |
-          set -euo pipefail
+          set -e
           Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --export-debug "Android (Debug)" "build/NeonFPV-debug.apk"
 
       - name: Export Android Release AAB (if keystore provided)
@@ -111,8 +103,8 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          set -euo pipefail
-          if [ -n "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+          set -e
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
             Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --export-release "Android (Release AAB)" "build/NeonFPV-release.aab"
           else
             echo "Release keystore secrets not set; skipping AAB."
