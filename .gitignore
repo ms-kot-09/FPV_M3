@@ -1,0 +1,11 @@
+# Godot
+.godot/
+.import/
+*.import
+
+# Builds
+/godot/build/
+/godot/keystore/
+
+# OS
+.DS_Store

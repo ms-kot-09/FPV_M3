@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "drones": [
+    {
+      "id": "fpv_mk1",
+      "name": "FPV Mk.I",
+      "type": "armed",
+      "weapon": "smg",
+      "hp": 100,
+      "speed": 1.0,
+      "agility": 1.0
+    },
+    {
+      "id": "fpv_mk2",
+      "name": "FPV Mk.II",
+      "type": "armed",
+      "weapon": "ar",
+      "hp": 110,
+      "speed": 0.95,
+      "agility": 0.95
+    },
+    {
+      "id": "fpv_mk3",
+      "name": "FPV Mk.III",
+      "type": "armed",
+      "weapon": "shotgun",
+      "hp": 95,
+      "speed": 1.05,
+      "agility": 1.05
+    },
+    {
+      "id": "fpv_mk4",
+      "name": "FPV Mk.IV",
+      "type": "armed",
+      "weapon": "sniper",
+      "hp": 85,
+      "speed": 1.1,
+      "agility": 0.9
+    },
+    {
+      "id": "fpv_mk5",
+      "name": "FPV Mk.V",
+      "type": "armed",
+      "weapon": "rockets",
+      "hp": 120,
+      "speed": 0.9,
+      "agility": 0.85
+    },
+    {
+      "id": "kamikaze_s",
+      "name": "Kamikaze S",
+      "type": "kamikaze",
+      "blast_radius": 4.0,
+      "damage": 140,
+      "hp": 80,
+      "speed": 1.15,
+      "agility": 1.1
+    },
+    {
+      "id": "kamikaze_m",
+      "name": "Kamikaze M",
+      "type": "kamikaze",
+      "blast_radius": 6.0,
+      "damage": 180,
+      "hp": 90,
+      "speed": 1.05,
+      "agility": 1.0
+    },
+    {
+      "id": "kamikaze_l",
+      "name": "Kamikaze L",
+      "type": "kamikaze",
+      "blast_radius": 8.0,
+      "damage": 240,
+      "hp": 100,
+      "speed": 0.95,
+      "agility": 0.9
+    },
+    {
+      "id": "kamikaze_x",
+      "name": "Kamikaze X",
+      "type": "kamikaze",
+      "blast_radius": 10.0,
+      "damage": 300,
+      "hp": 110,
+      "speed": 0.9,
+      "agility": 0.85
+    },
+    {
+      "id": "kamikaze_stealth",
+      "name": "Kamikaze Stealth",
+      "type": "kamikaze",
+      "blast_radius": 6.0,
+      "damage": 200,
+      "hp": 75,
+      "speed": 1.1,
+      "agility": 1.15,
+      "stealth": true
+    },
+    {
+      "id": "dji_ravager",
+      "name": "DJI Ravager",
+      "type": "dji",
+      "weapon": "autocannon",
+      "hp": 180,
+      "speed": 0.85,
+      "agility": 0.8
+    },
+    {
+      "id": "dji_longbow",
+      "name": "DJI Longbow",
+      "type": "dji",
+      "weapon": "missiles",
+      "hp": 170,
+      "speed": 0.9,
+      "agility": 0.75
+    }
+  ]
+}

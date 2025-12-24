@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/MainMenu.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/DroneSelect.tscn" id="2"]
+
+[node name="MainMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+drone_select_scene = ExtResource("2")
+
+[node name="Root" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Top" type="HBoxContainer" parent="Root"]
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 64.0
+
+[node name="Title" type="Label" parent="Root/Top"]
+text = "NeonFPV"
+
+[node name="Coins" type="Label" parent="Root/Top"]
+text = "Coins: 0"
+size_flags_horizontal = 3
+horizontal_alignment = 2
+
+[node name="Buttons" type="VBoxContainer" parent="Root"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -120.0
+offset_right = 180.0
+offset_bottom = 120.0
+
+[node name="Play" type="Button" parent="Root/Buttons"]
+text = "Play"
+custom_minimum_size = Vector2(0, 56)

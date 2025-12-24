@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "weapons": [
+    {
+      "id": "smg",
+      "name": "Vector SMG",
+      "type": "hitscan",
+      "rpm": 900,
+      "damage": 8,
+      "range": 40,
+      "spread": 0.012,
+      "recoil": 0.08,
+      "mag": 30,
+      "reload_s": 1.6
+    },
+    {
+      "id": "ar",
+      "name": "AR-15",
+      "type": "hitscan",
+      "rpm": 720,
+      "damage": 11,
+      "range": 60,
+      "spread": 0.010,
+      "recoil": 0.10,
+      "mag": 30,
+      "reload_s": 1.9
+    },
+    {
+      "id": "sniper",
+      "name": "Longshot",
+      "type": "hitscan",
+      "rpm": 75,
+      "damage": 90,
+      "range": 140,
+      "spread": 0.002,
+      "recoil": 0.35,
+      "mag": 5,
+      "reload_s": 2.4
+    },
+    {
+      "id": "shotgun",
+      "name": "Boomstick",
+      "type": "shotgun",
+      "rpm": 120,
+      "pellets": 8,
+      "damage": 12,
+      "range": 25,
+      "spread": 0.045,
+      "recoil": 0.28,
+      "mag": 6,
+      "reload_s": 2.2
+    },
+    {
+      "id": "rockets",
+      "name": "Micro Rockets",
+      "type": "projectile",
+      "rpm": 120,
+      "damage": 90,
+      "range": 120,
+      "blast_radius": 4.5,
+      "projectile_speed": 55,
+      "spread": 0.010,
+      "recoil": 0.22,
+      "mag": 6,
+      "reload_s": 2.8
+    },
+    {
+      "id": "autocannon",
+      "name": "DJI Autocannon",
+      "type": "hitscan",
+      "rpm": 600,
+      "damage": 16,
+      "range": 80,
+      "spread": 0.008,
+      "recoil": 0.14,
+      "mag": 60,
+      "reload_s": 2.4
+    },
+    {
+      "id": "missiles",
+      "name": "DJI Missiles",
+      "type": "projectile",
+      "rpm": 60,
+      "damage": 160,
+      "range": 180,
+      "blast_radius": 7.0,
+      "projectile_speed": 65,
+      "spread": 0.004,
+      "recoil": 0.30,
+      "mag": 4,
+      "reload_s": 3.2
+    }
+  ]
+}

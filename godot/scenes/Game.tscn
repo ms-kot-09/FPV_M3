@@ -1,0 +1,79 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/Game.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Drone.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/Rocket.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/EnemySpawner.gd" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/EnemySoldier.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/EnemyCar.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://scenes/EnemyTank.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/TouchHUD.tscn" id="8"]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(120, 1, 120)
+
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(120, 1, 120)
+
+[sub_resource type="BoxMesh" id="3"]
+size = Vector3(6, 3, 2)
+
+[sub_resource type="BoxShape3D" id="4"]
+size = Vector3(6, 3, 2)
+
+[node name="Game" type="Node3D"]
+script = ExtResource("1")
+drone_scene = ExtResource("2")
+rocket_scene = ExtResource("3")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+position = Vector3(0, -0.5, 0)
+
+[node name="FloorCollider" type="StaticBody3D" parent="."]
+
+[node name="FloorCollision" type="CollisionShape3D" parent="FloorCollider"]
+shape = SubResource("2")
+
+[node name="Obstacle1" type="MeshInstance3D" parent="."]
+mesh = SubResource("3")
+position = Vector3(10, 1.5, 0)
+
+[node name="Obstacle1Body" type="StaticBody3D" parent="Obstacle1"]
+
+[node name="Obstacle1Col" type="CollisionShape3D" parent="Obstacle1/Obstacle1Body"]
+shape = SubResource("4")
+
+[node name="DroneSpawn" type="Marker3D" parent="."]
+position = Vector3(0, 2.5, 12)
+
+[node name="CameraPivot" type="Node3D" parent="DroneSpawn"]
+
+[node name="Camera3D" type="Camera3D" parent="DroneSpawn/CameraPivot"]
+position = Vector3(0, 0.2, 0.0)
+
+[node name="EnemySpawner" type="Node3D" parent="."]
+script = ExtResource("4")
+soldier_scene = ExtResource("5")
+car_scene = ExtResource("6")
+tank_scene = ExtResource("7")
+position = Vector3(0, 0, -10)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="HUD"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Stats" type="Label" parent="HUD/Root"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 16.0
+offset_top = 64.0
+offset_right = 600.0
+offset_bottom = 96.0
+text = "Kills: 0  Coins: 0"
+
+[node name="TouchHUD" parent="." instance=ExtResource("8")]

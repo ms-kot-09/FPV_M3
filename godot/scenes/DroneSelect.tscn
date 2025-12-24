@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/DroneSelect.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/Game.tscn" id="2"]
+
+[node name="DroneSelect" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+game_scene = ExtResource("2")
+
+[node name="Root" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="Panel" parent="Root"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -220.0
+offset_right = 360.0
+offset_bottom = 220.0
+
+[node name="VBox" type="VBoxContainer" parent="Root/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+
+[node name="DroneList" type="OptionButton" parent="Root/Panel/VBox"]
+custom_minimum_size = Vector2(0, 56)
+
+[node name="Info" type="RichTextLabel" parent="Root/Panel/VBox"]
+custom_minimum_size = Vector2(0, 180)
+fit_content = true
+
+[node name="Start" type="Button" parent="Root/Panel/VBox"]
+text = "Start"
+custom_minimum_size = Vector2(0, 56)

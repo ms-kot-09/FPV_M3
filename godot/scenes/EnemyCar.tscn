@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/EnemyVehicle.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/Damageable.gd" id="2"]
+
+[sub_resource type="BoxMesh" id="1"]
+size = Vector3(1.6, 0.6, 3.0)
+
+[sub_resource type="BoxShape3D" id="2"]
+size = Vector3(1.6, 0.6, 3.0)
+
+[node name="EnemyCar" type="Node3D"]
+script = ExtResource("1")
+fire_cooldown = 1.4
+damage = 12.0
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("1")
+
+[node name="Collider" type="StaticBody3D" parent="."]
+
+[node name="Collision" type="CollisionShape3D" parent="Collider"]
+shape = SubResource("2")
+
+[node name="Damageable" type="Node" parent="."]
+script = ExtResource("2")
+max_hp = 120.0

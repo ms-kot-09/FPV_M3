@@ -1,0 +1,104 @@
+name: Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.5.1"
+      PROJECT_PATH: "godot"
+      BUILD_DIR: "godot/build"
+      ANDROID_SDK_ROOT: "${{ github.workspace }}/android-sdk"
+      ANDROID_HOME: "${{ github.workspace }}/android-sdk"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |-
+            platform-tools
+            platforms;android-34
+            build-tools;34.0.0
+            cmdline-tools;latest
+
+      - name: Download Godot Headless
+        run: |
+          set -e
+          mkdir -p "$HOME/godot"
+          cd "$HOME/godot"
+          curl -L -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          echo "$HOME/godot" >> $GITHUB_PATH
+
+      - name: Install Export Templates
+        run: |
+          set -e
+          mkdir -p "$HOME/.local/share/godot/export_templates"
+          cd "$HOME/.local/share/godot/export_templates"
+          curl -L -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          mkdir -p "${GODOT_VERSION}.stable"
+          unzip -q templates.tpz -d "${GODOT_VERSION}.stable"
+
+      - name: Prepare keystores
+        working-directory: ${{ env.PROJECT_PATH }}
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          mkdir -p keystore
+          # Debug keystore (always generated)
+          keytool -genkeypair -v -keystore keystore/debug.keystore -storepass android -alias androiddebugkey -keypass android \
+            -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
+
+          # Release keystore (optional: only if secrets exist)
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > keystore/release.keystore
+          fi
+
+      - name: Import project (generate .import)
+        run: |
+          set -e
+          mkdir -p "${BUILD_DIR}"
+          Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --import
+
+      - name: Export Android Debug APK
+        run: |
+          set -e
+          Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --export-debug "Android (Debug)" "build/NeonFPV-debug.apk"
+
+      - name: Export Android Release AAB (if keystore provided)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -e
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            Godot_v${GODOT_VERSION}-stable_linux.x86_64 --headless --path "${PROJECT_PATH}" --export-release "Android (Release AAB)" "build/NeonFPV-release.aab"
+          else
+            echo "Release keystore secrets not set; skipping AAB."
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: NeonFPV-Android
+          path: |
+            godot/build/*.apk
+            godot/build/*.aab
